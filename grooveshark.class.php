@@ -1,14 +1,14 @@
 <?php
 /**
- * class Groovshark
+ * class Grooveshark
  *
- * GroovShark PHP Class for the undocumented GroovShark API. 
- * @package GroovShark
+ * GrooveShark PHP Class for the undocumented GrooveShark API. 
+ * @package GrooveShark
  * @author Matt Austin
  * @version 1.0
  **/
 
-class GroovShark 
+class GrooveShark 
 {
 	public $session = null;
 	public $profile = Array();
@@ -118,6 +118,22 @@ class GroovShark
 		$data = $this->send('userGetPlaylists', $params);
 		return $data['Playlists'];
 	}
+	
+	
+		/** getFavorites
+	     *
+	     * @param int $user_id
+	     * @param string ofWhat (Albums)
+	     * @return mixed Playlist data
+	     */
+		public function getFavorites($user_id, $ofWhat) {
+			$params = array(
+				'userID' => $user_id,
+				'ofWhat' => 
+			);
+			$data = $this->send('userGetPlaylists', $params);
+			return $data['Playlists'];
+		}	
 	
 /** Search Functions **/
 
