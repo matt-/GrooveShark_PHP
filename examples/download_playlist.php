@@ -1,6 +1,7 @@
 <?php
 	
-	include("grooveshark.class.php");
+	require './grooveshark.class.php';
+	
 	if ($argc != 2) {
 		$playlist_name = 'download';
 	}
