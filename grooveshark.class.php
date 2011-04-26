@@ -124,12 +124,12 @@ class GrooveShark
 	     *
 	     * @param int $user_id
 	     * @param string ofWhat (Albums)
-	     * @return mixed Playlist data
+	     * @return mixed Song data
 	     */
 		public function getFavorites($user_id, $ofWhat) {
 			$params = array(
 				'userID' => $user_id,
-				'ofWhat' => 
+				'ofWhat' => $ofWhat,
 			);
 			$data = $this->send('userGetPlaylists', $params);
 			return $data['Playlists'];
