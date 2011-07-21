@@ -1,141 +1,78 @@
 <?php
 /**
- * class Grooveshark
+ * GrooveShark - Interface to the Grooveshark unofficial web API
+ * 
+ * PHP Version 5
  *
- * GrooveShark PHP Class for the undocumented GrooveShark API. 
- * @package GrooveShark
- * @author Matt Austin
- * @version 1.0
- **/
+ * @author Matt Austin <matt@m-ausitn.com>
+ */
+
+include("util.class.php");
+include("http.class.php");
 
 class GrooveShark 
 {
-	public $session = null;
-	public $profile = Array();
+	public $http = array();
+	public $country = '';
+	public $secretKey = '';
+	public $session = '';	
 	
-	private $token = null;	
+	private $communication_token = '';
 	private $lastRandomizer = null;
-	private $communication_token = null;
-	
-	private $clientRevision = '20101222'; // should be a costant?
-	private $uuid = '6D3BFDDD-B6D6-4E64-BA91-B63C9213BAD1';
-	private $action_url = 'listen.grooveshark.com/more.php?';
+	private $uuid = '';
 	
 	
-	//public $client = 'widget'; // this may be needed to get the stream 
-	//public $client = 'jsqueue';
-	private $http_headers = array(
-		'User-Agent'       => 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.6; rv:2.0) Gecko/20100101 Firefox/4.0',
-		'Accept'           => 'application/json, text/javascript, */*',
-		'Connection'       => 'keep-alive',
-		'Content-Type'     => 'application/json; charset=UTF-8',
-		'X-Requested-With' => 'XMLHttpRequest',
-		'Referer'          => 'http://listen.grooveshark.com/',
-#		'Content-Length'   => null,
-		'Cookie'           => null,
-		'Host'             => 'listen.grooveshark.com',
-		'Pragma'           => 'no-cache',
-		'Cache-Control'    => 'no-cache'
+	public $options = array(
+		'base_domin'     => 'grooveshark.com',
+		'getAppData'     => false,
+		'proxy'          => false,
+		'configDefaults' => array(
+			'client'         => 'htmlshark',
+			'clientRevision' => '20110606',
+			'revToken'       => 'backToTheScienceLab',
+			// tokenKey from from JSQueue.swf /action/JSQueue.as
+			'tokenKey'       => 'bewareOfBearsharktopus'
+		),
 	);
 	
-	// this should be replaced with the "getCountry" call
-	private $country = array (
-		'ID' => '65',
-		'CC1' => '0',
-		'CC2' => '1',
-		'CC3' => '0',
-		'CC4' => '0',
-		'IPR' => '7854'
-	);
-	
-	public function __construct($session_id = null) 
+	public function __construct($options = null) 
 	{
-		if(!$session_id){
-			$this->getSession();
+		// If options were passed in the the constructor merge them into the default options
+		if($options){
+			$this->options = Util::merge($this->options,$options);
 		}
-	}
 
-
-/** Usuer Functions **/
-
-	/** Login (to get curent user id)
-     *
-     * @param string $username
-     * @param string $password
-     * @return bool true on success 
-     */
-	public function login($username, $password, $get_playlist = true) {
-		$params = array(
-			'username' => $username,
-			'password' => $password,
-			'savePassword' => 0,
+		// Default HTTP options 
+		$http_options = array(
+			#'proxy' => 'tcp://127.0.0.1:8080',
+			#'follow_redirects' => false,
+			#'headers' => array('User-Agent' => 'test'),
 		);
+		
+		// Set up proxy server if we need it
+		if($this->options['proxy']){
+			$http_options['proxy'] = $this->options['proxy'];
+		}		
+		
+		$this->http = new http($http_options);
 
-		$data = $this->send('authenticateUser', $params, 'htmlshark', true);
+		// Read new app data form the app.js javascript file
+		// That will give us the new clientRevision and revToken if this ever stops working
+		if($this->options['getAppData']){
+			$this->getAppData();
+		}					
 		
-		if($data['authToken'] == null){
-			return false;
-		}
-		
-		if($get_playlist){
-			$data['Playlists'] = $this->userGetPlaylists($data['userID']);
-		}
+		$this->getSession();
+		$this->communication_token = $this->getCommunicationToken();
 				
-		$this->profile = $data;
-		return $data;
-	}
-	
-	/** Logout
-     */	
-	public function logout() {
-		$params = array();
-		$data = $this->send('logoutUser', $params);
-		return true;
 	}
 
-	/** getUserByID
-     *
-     * @param int $user_id
-     * @return mixed  
-     */
-	public function getUserByID($user_id) {
-		$params = array(
-			'userID' => $user_id,
-		);
-		$data = $this->send('getUserByID', $params);
-		return $data['User'];
+	public function getSongFromToken($token){
+		return $this->send('getSongFromToken', array(
+			'token' => $token,
+			'country' => $this->country
+		));
 	}
-
-	/** userGetPlaylists
-     *
-     * @param int $user_id
-     * @return mixed Playlist data
-     */
-	public function userGetPlaylists($user_id) {
-		$params = array(
-			'userID' => $user_id,
-		);
-		$data = $this->send('userGetPlaylists', $params);
-		return $data['Playlists'];
-	}
-	
-	
-		/** getFavorites
-	     *
-	     * @param int $user_id
-	     * @param string ofWhat (Albums)
-	     * @return mixed Song data
-	     */
-		public function getFavorites($user_id, $ofWhat) {
-			$params = array(
-				'userID' => $user_id,
-				'ofWhat' => $ofWhat,
-			);
-			$data = $this->send('userGetPlaylists', $params);
-			return $data['Playlists'];
-		}	
-	
-/** Search Functions **/
 
     /** Search 
      *
@@ -153,64 +90,46 @@ class GrooveShark
 		return $data['result'];
 	}
 
-    /** List songs in playlist
-     *
-     * @param int $playlist_id Playlist Id
-     * @return array Array of songs 
-     */
-	public function playlistGetSongs($playlist_id) {
-		$params = array(
-			'playlistID' => $playlist_id,
-		);
-		$data = $this->send('playlistGetSongs', $params);
-		return $data['Songs'];
-	}
-
-    /** List all songs by an artist
+	/** Get Song (stream) data by id
      *
      * @param int $artist_id Artist Id
-     * @return array Array of songs 
+     * @return mixed Song Data
+     */
+	public function getSongById($song_id) {
+		$params = array(
+			'songID' => $song_id,
+			'mobile' => 'false',
+			'prefetch' => 'false',
+			'country' => $this->country,		
+		);
+		$result = $this->send('getStreamKeyFromSongIDEx', $params, 'jsqueue');
+		
+		// add the download URL to this data. 
+		if(isset($result['ip'])){
+			$result['url'] = "http://{$result['ip']}/stream.php?streamKey={$result['streamKey']}";
+		}
+		return $result;
+	}
+
+	/** Get song by a url 
+     *
+     * @param string $url
+     * @return mixed Song Data
      */	
-	public function getSongsByArtist($artist_id) {
-		$params = array(
-			"artistID" => $artist_id,
-			"isVerified" => true,
-			"offset" => 0		
-		);
-		$data = $this->send('artistGetSongs', $params);
-		if(isset($data['songs'])){
-			return $data['songs'];
+	public function getSongByUrl($url){
+		// parse the "token" form the url
+		if(preg_match('/\w+(?=\?)/', $url, $matches)){
+			$token = $matches[0];
+			$params = array(
+				'token' => $token,
+				'country' => $this->country,		
+			);
+			return $this->send('getSongFromToken', $params);				
 		}
-		return array();
+		else{
+			return false;
+		}		
 	}
-
-    /** List all albums by an artist
-     *
-     * @param int $artist_id Artist Id
-     * @return array Array of Albums 
-     */
-	public function getAlbumsByArtist($artist_id) {
-		$songs = $this->getSongsByArtist($artist_id);
-		$data = $albums = array();
-		if(count($songs)){
-			foreach($songs as $song) {
-				$albums[$song['AlbumID']] = array(
-					'AlbumName' => $song['AlbumName'],
-					'AlbumID' => $song['AlbumID'],
-					'CoverArtFilename' => $song['CoverArtFilename'],
-					'Year' => $song['Year'],
-					'ArtistName' => $song['ArtistName'],					
-				);
-			}
-			foreach($albums as $album) {
-				array_push($data, $album);
-			}			
-			return $data;
-		}
-		return array();
-	}
-
-/** Song Functions **/
 
 	/** List all songs in an album
      *
@@ -230,62 +149,134 @@ class GrooveShark
 		return array();
 	}
 
-	/** Get Song (stream) data by id
+    /** List songs in playlist
      *
-     * @param int $artist_id Artist Id
-     * @return mixed Song Data
+     * @param int $playlist_id Playlist Id
+     * @return array Array of songs 
      */
-	public function getSongById($song_id) {
+	public function playlistGetSongs($playlist_id) {
 		$params = array(
-			'songID' => $song_id,
-			'mobile' => 'false',
-			'prefetch' => 'false',
-			'country' => $this->country,		
+			'playlistID' => $playlist_id,
 		);
-		return $this->send('getStreamKeyFromSongIDEx', $params, 'jsqueue');
+		$data = $this->send('playlistGetSongs', $params);
+		return $data['Songs'];
 	}
 
-	/** Get song by a url 
-     *
-     * @param string $url
-     * @return mixed Song Data
-     */	
-	public function getSongByUrl($url){
-		// parse the "token" form the url
-		//$url = 'http://listen.grooveshark.com/#/s/Read+My+Mind+album+Version+/2zLI60?src=5';
-		if(preg_match('/\w+(?=\?)/', $url, $matches)){
-			$token = $matches[0];
-			$params = array(
-				'token' => $token,
-				'country' => $this->country,		
+	public function send($method = '', $params = null, $client =null, $secure = false){
+		$query = array(
+			'header' => array(
+				'client' => ($client) ? $client : $this->options['configDefaults']['client'],
+				'clientRevision' => $this->options['configDefaults']['clientRevision'],
+				'session' => $this->session,
+				'privacy' => 0,
+				'country' => $this->country,
+				'uuid' => ($this->uuid) ? $this->uuid:Util::makeUUID(),
+			),
+			'method' => $method
+		);
+
+		// we need to send our own token for every request after the communication_token request
+		if(($this->communication_token) && !array_key_exists('token', $query['header'])){
+			$lastRandomizer = $this->makeNewRandomizer();	
+	
+			// TODO some functions require one key and some the other 
+			// this method should be changed to pass this in as an option with each call. 
+			
+			if($method == 'getStreamKeyFromSongIDEx'){
+				$token = $this->options['configDefaults']['tokenKey'];
+			}else{
+				$token = $this->options['configDefaults']['revToken'];
+			}	
+			// Build the "magic" hash
+			$query['header']['token'] = $lastRandomizer.sha1(
+				$method.":".
+				$this->communication_token.":".
+				$token.":".
+				$lastRandomizer
 			);
-			return $this->send('getSongFromToken', $params);				
 		}
-		else{
-			return false;
-		}		
+
+		// add parameters if they are passed
+		if( $params !== null ) {
+			$query['parameters'] = $params;
+		}
+
+		$protocol = ($secure) ? 'https://':'http://';
+		$url = $protocol . $this->options['base_domin'] ."/more.php?". $method;
+		$content = json_encode($query);
+		
+		// Post the data to the server
+		$data = $this->http->post($url, $content);	
+		$result = json_decode($data, true);
+		
+		// Pass up any errors
+		if(isset($result['fault'])){
+			throw new Exception($result['fault']['message']);
+		}
+		
+		// Return the result fromt he response
+		return $result['result'];
 	}
-
-/** internal Functions **/
-
+	
 	private function getSession(){
-		$this->session = $this->send('initiateSession'); 		
 	
-		if($this->session !== null){
-			$params = array(
-				'secretKey' => md5($this->session)
-			);
-			$this->communication_token = $this->send('getCommunicationToken', $params); 
-		}
-		else{
-			return false;
-		}
+		// Call to the base domain to get a PHP session.  While
+		// we are there why not read some JS varibles from the page. 
+		// We need country for example. 
 	
-		//return ($this->session !== null);
+		$data = $this->http->get("http://{$this->options['base_domin']}/");
+		$this->session = $this->http->get_cookie('PHPSESSID');
+		$this->secretKey = md5($this->session);
+		
+		preg_match("/gsConfig = (.*?);/", $data, $matches);
+		$result = json_decode($matches[1], true);
+		$this->country = $result['country'];		
 	}
 
-	private function makeNewRandomizer(){
-		// make sure we never send two random tokens in a row
+	public function getCommunicationToken(){
+		if($this->secretKey){
+			$this->uuid = Util::makeUUID();
+			return $this->send('getCommunicationToken', array(
+				'secretKey' => $this->secretKey
+			));
+		}
+		else{
+		 	/* oops we dont have key yet.. we either did not call get session yet
+		 	*  or something went wrong */
+		}
+	}
+	
+	public function getAppData(){
+		
+		/* TODO:  
+		*	this function should also get the tokenKey from the swf
+		*	http://grooveshark.com/JSQueue.swf
+		* 
+		*  Note: 
+		*	This can be done at runtime without decompiling using a preloader from mm.conf 
+		* 	and something like MixingLoom or SWFRETools for AOP. 
+		* 
+		* 	Create an air app that will preload this swf and find these varribles.
+		* 	This should avoide any legal issues with decompiling.
+		* 
+		* 	This will all be part of the AS lib for grooveshark along with the AIR app.  
+		*/
+		
+		$data = $this->http->get("http://static.a.gs-cdn.net/gs/app.js");
+		preg_match("/client:\"(?<client>\w+)\".*?clientRevision:\"(?<clientRevision>\d+)\".*?revToken:\"(?<revToken>\w+)\"/s", $data, $matches);
+		if(isset($matches)){
+			$this->configDefaults = Array(
+				'client' => $matches['client'],
+				'clientRevision' => $matches['clientRevision'],
+				'revToken' => $matches['revToken']
+			);
+			return $this->configDefaults;
+		}
+		return false;
+	}
+
+	private function makeNewRandomizer(){		
+		// This is just a random string, but make sure we never send the same token twice in a row.
 		$rand = sprintf("%06x",mt_rand(0,0xffffff));
 		if($rand !== $this->lastRandomizer){
 			$this->lastRandomizer = $rand;
@@ -294,74 +285,6 @@ class GrooveShark
 			return $this->makeNewRandomizer();
 		}
 	}
-
-	public function send($method, $params = null, $client = 'htmlshark', $secure = false){
-		$query = array(
-			'header' => array(
-				'client' => $client,
-				'clientRevision' => $this->clientRevision,
-				'privacy' => 0,
-				'country' => $this->country,
-				'uuid' => $this->uuid
-			),
-			'method' => $method
-		);
-
-		// add parameters if they are passed
-		if( $params !== null ) {
-			$query['parameters'] = $params;
-		}
-				
-		// set the session id and token if we have it
-		if($this->session !== null){
-			$http_headers['Cookie'] = 'PHPSESSID=' . $this->session;
-			$query['header']['session'] = $this->session;
-
-			// unless we dont have a token make a new random hash with the token
-			// and add it to the header.
-			if(($this->communication_token !== null) && !array_key_exists('token', $query['header'])){
-				$lastRandomizer = $this->makeNewRandomizer();
-				$query['header']['token'] = $lastRandomizer . sha1(
-					sprintf("%s:%s:quitStealinMahShit:%s", $method, $this->communication_token, $lastRandomizer)
-				);
-			}
-		}
-
-		// build the rest of the http headers
-		$protocol = ($secure) ? 'https://':'http://';
-		$url = $protocol . $this->action_url . $method;
-		$content = json_encode($query);
-		$data = $this->http_send($url, $content);
 		
-		$result = json_decode($data, true);
-		
-		if(isset($result['fault'])){
-			throw new Exception($result['fault']['message']);
-		}
-		
-		return $result['result'];
-	}
-	
-	private function http_send($url, $content = null){
-		// TODO: clean this up and move it to a class varible 
-		// Prepare the HTTP options
-		$options = array(
-			'http' => array(
-				'method' => 'POST',
-				'header' => array('Content-Length' => strlen($content)),
-				'content' => $content,
-			)
-		);
-
-		foreach($this->http_headers as $key => $value) {
-			$options['http']['header'] .= $key . ": " . $value . "\r\n";
-		}
-		
-		$context = stream_context_create($options);
-		$data = file_get_contents($url, false, $context); 	
-		return $data; 
-	}
-
 }
 
-?>

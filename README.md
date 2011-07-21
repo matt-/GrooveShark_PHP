@@ -1,35 +1,32 @@
-GrooveShark PHP SDK
-================
+Grooveshark unofficial PHP SDK (v.0.0.1)
+==========================
 
-[GrooveShark](http://groovshark.com/) is a online playlist manager. This API 
-provides access to searches songs and playlist functionality.
+Despite having an extensive API, it is not publicly open: 
+"Our content providers are very strict about the clientele that we can provide access to."
 
-This repository contains the open source PHP SDK that allows you to utilize the
-above on your website. Except as otherwise noted, This API
-is licensed under the Apache Licence, Version 2.0
-(http://www.apache.org/licenses/LICENSE-2.0.html)
+This class simply uses what web application itself uses to search and play songs.  
 
 
 Usage
 -----
 
-The [examples][examples] are a good place to start. The minimal you'll need to
-have is:
+The minimal you'll need to have is:
 
-    <?php
+```php
+include("grooveshark.class.php");
 
-    require './grooveshark.class.php';
+$gs = new GrooveShark();
+$url = 'http://grooveshark.com/#/s/Cookies+With+A+Smile/3EXEk7?src=5';
+$song = $gs->getSongByUrl($url);
 
-	$gs = new GrooveShark();
+$data = $gs->getSongById($song['SongID']);
+
+print_r($data);
+```
 
 
-[examples]: http://github.com/matt-/GrooveShark_PHP/blob/master/examples/download_playlist.php
+TODO
+-----
 
-
-Feedback
---------
-
-We are relying on the [GitHub issues tracker][issues] linked from above for
-feedback. File bugs or other issues [here][issues].
-
-[issues]: https://github.com/matt-/GrooveShark_PHP/issues
+1. PHPDoc for all api functions
+2. Add API functions for Login, Searching, Radio ...
