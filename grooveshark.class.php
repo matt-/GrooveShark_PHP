@@ -84,7 +84,9 @@ class GrooveShark
 	public function search($search, $type = 'Songs') {
 		$params = array(
 			'query' => $search,
-			'type' => $type
+			'type' => $type,
+			'guts' => 0,
+			'ppOverride' => false,
 		);
 		$data = $this->send('getSearchResultsEx', $params);
 		return $data['result'];

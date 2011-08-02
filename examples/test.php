@@ -1,5 +1,5 @@
 <?php
-include("grooveshark.class.php");
+include("../grooveshark.class.php");
 
 $gs = new GrooveShark(array(
 /* an example of the options you can pass in.
@@ -15,9 +15,10 @@ $gs = new GrooveShark(array(
 // if they change the clientRevision or revToken this will try to find it from app.js.
 #$gs->getAppData();
 
-$url = 'http://grooveshark.com/#/s/Cookies+With+A+Smile/3EXEk7?src=5';
-$song = $gs->getSongByUrl($url);
+#$url = 'http://grooveshark.com/#/s/Cookies+With+A+Smile/3EXEk7?src=5';
+#$song = $gs->getSongByUrl($url);
 #print_r($gs->getSongFromToken("3EXEk7"));
-$data = $gs->getSongById($song['SongID']);
+#$data = $gs->getSongById($song['SongID']);
+$data = $gs->search('Wear sunscreen');
 
 print_r($data);
