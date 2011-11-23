@@ -29,8 +29,10 @@ class GrooveShark
 		'configDefaults' => array(
 			'client'         => 'htmlshark',
 			'clientRevision' => '20110906',
+			//clientRevision and revToken from: http://static.a.gs-cdn.net/gs/app.js
 			'revToken'       => 'imOnAHorse',
 			// tokenKey from from JSQueue.swf /action/JSQueue.as
+			// use: http://www.showmycode.com/ and file: http://grooveshark.com/JSQueue.swf
 			'tokenKey'       => 'theTicketsAreNowDiamonds'
 		),
 	);
