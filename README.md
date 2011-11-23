@@ -30,3 +30,18 @@ TODO
 
 1. PHPDoc for all api functions
 2. Add API functions for Login, Searching, Radio ...
+
+Notes
+-----
+
+Grooveshark changes the keys from time to time. I will try to update them as quickly as possible.
+The script get_keys.php will download the swf files and js files needed and attempt to recover the new keys.
+
+swfdump is required for this application. 
+
+$ php get_keys.php 
+____________________
+Token Key: theTicketsAreNowDiamonds
+Client: htmlshark
+Client Revision: 20110906
+Rev Token: imOnAHorse
