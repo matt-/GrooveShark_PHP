@@ -39,11 +39,13 @@ The script get_keys.php will download the swf files and js files needed and atte
 
 swfdump is required for this application. 
 
-$ php get_keys.php 
+
 ```php
+$ php get_keys.php 
 ____________________
 Token Key: theTicketsAreNowDiamonds
 Client: htmlshark
 Client Revision: 20110906
 Rev Token: imOnAHorse
 ```
+
