@@ -28,10 +28,10 @@ class GrooveShark
 		'proxy'          => false,
 		'configDefaults' => array(
 			'client'         => 'htmlshark',
-			'clientRevision' => '20110606',
-			'revToken'       => 'backToTheScienceLab',
+			'clientRevision' => '20110906',
+			'revToken'       => 'imOnAHorse',
 			// tokenKey from from JSQueue.swf /action/JSQueue.as
-			'tokenKey'       => 'bewareOfBearsharktopus'
+			'tokenKey'       => 'theTicketsAreNowDiamonds'
 		),
 	);
 	
@@ -206,6 +206,8 @@ class GrooveShark
 		$protocol = ($secure) ? 'https://':'http://';
 		$url = $protocol . $this->options['base_domin'] ."/more.php?". $method;
 		$content = json_encode($query);
+		
+		print_r($content);
 		
 		// Post the data to the server
 		$data = $this->http->post($url, $content);	

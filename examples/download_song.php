@@ -6,7 +6,7 @@
 	include("../grooveshark.class.php");
 
 	$gs = new GrooveShark();
-	$url = 'http://grooveshark.com/s/Sunlight/3tclew?src=5';
+	$url = 'http://grooveshark.com/s/1980/2JS6Dg?src=5';
 
 	# look up the son URL then get the download URL. 
 	$song = $gs->getSongByUrl($url);
@@ -15,7 +15,7 @@
 	# push the file name in the header
 	$filename = "{$song['ArtistName']} - {$song['Name']}.mp3";
 	header("Content-Disposition: attachment; filename={$filename}");
-	passthru("wget -qO- {$data['url']}");
+#	passthru("wget -qO- {$data['url']}");
 
 
 ?>

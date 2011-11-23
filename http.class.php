@@ -1,5 +1,5 @@
 <?php
-
+date_default_timezone_set('America/Los_Angeles');
 class http {
 
 	public $cookies = array();
