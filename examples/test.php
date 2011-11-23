@@ -19,6 +19,29 @@ $gs = new GrooveShark(array(
 #$song = $gs->getSongByUrl($url);
 #print_r($gs->getSongFromToken("3EXEk7"));
 #$data = $gs->getSongById($song['SongID']);
-$data = $gs->search('Wear sunscreen');
+$data = $gs->search('Cookies With A Smile');
 
 print_r($data);
+/*	$zip = new ZipArchive();
+
+	$playlist_id = '57895619';
+	$filename = $playlist_id . '.zip';
+	
+	if ($zip->open($filename, ZIPARCHIVE::CREATE)!==TRUE) {
+	    exit("cannot create <$filename>\n");
+	}
+	
+	#$zip->addFromString('test.txt' , 'test');
+	
+	get_mem();
+	
+	#$zip->close();
+	
+	function get_mem(){
+		$size = memory_get_usage(true);
+		$unit=array('b','kb','mb','gb','tb','pb');
+		$size = @round($size/pow(1024,($i=floor(log($size,1024)))),2).' '.$unit[$i];
+		echo "Mem: $size\n"; // 123 kb
+	}
+*/
+
