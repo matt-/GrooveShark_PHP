@@ -1,15 +1,17 @@
 <?php
 	include("../grooveshark.class.php");
-
+	$music_path = "songs";
 	// remove memry limits 
 	ini_set('memory_limit', -1);
 
 	$gs = new GrooveShark();
 	$playlist_id = $argv[1];
 
-	echo "Downloading playlist: $playlist_id\n";
+	$playlist = $gs->getPlaylistByID($playlist_id);
+	$songs = $playlist['Songs'];
 
-	$songs = $gs->playlistGetSongs($playlist_id);
+	echo "Downloading playlist: {$playlist['Name']}\n";
+
 
 	$filename = $playlist_id . '.zip';
 	$zip = new ZipArchive();
@@ -21,9 +23,10 @@
 		}
 		$songs_info = $gs->getSongById($song['SongID']);
 		$file_name = $song['Name'].".mp3";
-		echo "Downloading file: {$file_name}\n";
-		$zip->addFromString($file_name , file_get_contents($songs_info['url']));		
-		$zip->close();
+		passthru("wget -O \"$music_path/{$file_name}\" {$songs_info['url']}");
+		echo "Downloading file: {$file_name} from url: {$songs_info['url']} \n";
+		#$zip->addFromString($file_name , file_get_contents($songs_info['url']));		
+		#$zip->close();
 	}
 	echo "Created file: {$filename}\ndone.\n";
 

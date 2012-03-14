@@ -19,9 +19,12 @@ $gs = new GrooveShark(array(
 #$song = $gs->getSongByUrl($url);
 #print_r($gs->getSongFromToken("3EXEk7"));
 #$data = $gs->getSongById($song['SongID']);
-$data = $gs->search('Cookies With A Smile');
+#$data = $gs->search('Cookies With A Smile');
 
-print_r($data);
+$data = $gs->getPlaylistByID(65715998);
+
+
+print_r($data['Name']);
 /*	$zip = new ZipArchive();
 
 	$playlist_id = '57895619';

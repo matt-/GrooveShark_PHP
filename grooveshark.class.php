@@ -28,12 +28,12 @@ class GrooveShark
 		'proxy'          => false,
 		'configDefaults' => array(
 			'client'         => 'htmlshark',
-			'clientRevision' => '20110906',
+			'clientRevision' => '20120227',
 			//clientRevision and revToken from: http://static.a.gs-cdn.net/gs/app.js
-			'revToken'       => 'imOnAHorse',
+			'revToken'       => 'makeAllTheMoney',
 			// tokenKey from from JSQueue.swf /action/JSQueue.as
 			// use: http://www.showmycode.com/ and file: http://grooveshark.com/JSQueue.swf
-			'tokenKey'       => 'theTicketsAreNowDiamonds'
+			'tokenKey'       => 'riceAndChicken'
 		),
 	);
 	
@@ -46,7 +46,7 @@ class GrooveShark
 
 		// Default HTTP options 
 		$http_options = array(
-			#'proxy' => 'tcp://127.0.0.1:8080',
+			'proxy' => 'tcp://127.0.0.1:8080',
 			#'follow_redirects' => false,
 			#'headers' => array('User-Agent' => 'test'),
 		);
@@ -153,6 +153,19 @@ class GrooveShark
 		return array();
 	}
 
+    /** Get playlist info and songs
+     *
+     * @param int $playlist_id Playlist Id
+     * @return array Array of songs 
+     */
+	public function getPlaylistByID($playlist_id) {
+		$params = array(
+			'playlistID' => $playlist_id,
+		);
+		$data = $this->send('getPlaylistByID', $params);
+		return $data;
+	}
+
     /** List songs in playlist
      *
      * @param int $playlist_id Playlist Id
@@ -209,8 +222,6 @@ class GrooveShark
 		$url = $protocol . $this->options['base_domin'] ."/more.php?". $method;
 		$content = json_encode($query);
 		
-		print_r($content);
-		
 		// Post the data to the server
 		$data = $this->http->post($url, $content);	
 		$result = json_decode($data, true);
@@ -244,7 +255,7 @@ class GrooveShark
 			$this->uuid = Util::makeUUID();
 			return $this->send('getCommunicationToken', array(
 				'secretKey' => $this->secretKey
-			));
+			),null, true);
 		}
 		else{
 		 	/* oops we dont have key yet.. we either did not call get session yet

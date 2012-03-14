@@ -13,6 +13,8 @@
 	$dump = `swfdump -a $filename 2>&1`;
 	unlink($filename);
 	
+	echo $dump;
+	
 	#find the com.grooveshark.jsQueue::Service call
 	preg_match('/findpropstrict <q>\[public\]com\.grooveshark\.jsQueue::Service.*?initproperty <q>\[private\]NULL::service/s', $dump, $blocks);
 	$block = $blocks[0];
