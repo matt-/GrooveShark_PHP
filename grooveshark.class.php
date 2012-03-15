@@ -46,7 +46,7 @@ class GrooveShark
 
 		// Default HTTP options 
 		$http_options = array(
-			'proxy' => 'tcp://127.0.0.1:8080',
+			#'proxy' => 'tcp://127.0.0.1:8080',
 			#'follow_redirects' => false,
 			#'headers' => array('User-Agent' => 'test'),
 		);
@@ -90,7 +90,7 @@ class GrooveShark
 			'guts' => 0,
 			'ppOverride' => false,
 		);
-		$data = $this->send('getSearchResultsEx', $params);
+		$data = $this->send('getResultsFromSearch', $params);
 		return $data['result'];
 	}
 
