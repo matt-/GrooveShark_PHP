@@ -10,17 +10,12 @@
 	file_put_contents($filename, file_get_contents($url));
 	
 	# fun swfdump
-	$dump = `swfdump -a $filename 2>&1`;
+	$dump = `swfdump -a $filename 2>&1 | grep "findpropstrict <q>\[public\]com.grooveshark.jsQueue::Service$" -B 5 `;
+	
 	unlink($filename);
 	
-	echo $dump;
-	
-	#find the com.grooveshark.jsQueue::Service call
-	preg_match('/findpropstrict <q>\[public\]com\.grooveshark\.jsQueue::Service.*?initproperty <q>\[private\]NULL::service/s', $dump, $blocks);
-	$block = $blocks[0];
-
-	if(preg_match('/pushstring "(.*?)"/s', $block, $matches)){
-		$tokenKey = $matches[1];
+	if(preg_match('/pushstring "(.*?)"/s', $dump, $matches)){
+		$tokenKey = end($matches);
 		echo "Token Key: $tokenKey\n";
 	}
 	else{

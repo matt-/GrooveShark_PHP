@@ -28,12 +28,12 @@ class GrooveShark
 		'proxy'          => false,
 		'configDefaults' => array(
 			'client'         => 'htmlshark',
-			'clientRevision' => '20120227',
 			//clientRevision and revToken from: http://static.a.gs-cdn.net/gs/app.js
-			'revToken'       => 'makeAllTheMoney',
+			'clientRevision' => '20120312',
+			'revToken'       => 'reallyHotSauce',
 			// tokenKey from from JSQueue.swf /action/JSQueue.as
 			// use: http://www.showmycode.com/ and file: http://grooveshark.com/JSQueue.swf
-			'tokenKey'       => 'riceAndChicken'
+			'tokenKey'       => 'paperPlates'
 		),
 	);
 	
