@@ -26,7 +26,4 @@
 #	header("Content-Disposition: attachment; filename={$filename}");
 	passthru("wget -O $music_path/{$filename} {$data['url']}");
 
-
-	osascript -e 'tell application "iTunes" to add POSIX file "/Users/xil/Psycho_Chicken.mp3"'
-
 ?>
