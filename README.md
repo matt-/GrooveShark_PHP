@@ -43,7 +43,7 @@ swfdump is required for this application.
 ```php
 $ php get_keys.php 
 ____________________
-Token Key: theTicketsAreNowDiamonds
+Token Key: paperPlates
 Client: htmlshark
 Client Revision: 20110906
 Rev Token: reallyHotSauce
